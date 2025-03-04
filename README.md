@@ -50,7 +50,7 @@ To deactivate the virtual environment, use the command:
 Install the required dependencies:
 ```shell
 (venv) ~/your-project $ pip install -r requirements.txt
-```shell
+```
 ## **2.3 Run N-gram**
 
 (1) Run N-gram Demo
