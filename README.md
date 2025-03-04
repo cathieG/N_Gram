@@ -25,39 +25,41 @@ This project is implemented in **Python 3.9+** and is compatible with **macOS, L
 (1) Clone the repository to your workspace:  
 ```shell
 ~ $ git clone https://github.com/cathieG/N_Gram.git
-
+```
 (2) Navigate into the repository: (change according to your directory structure)
-
+```shell
 ~ $ cd your-project
 ~/your-project $
-
+```
 (3) Set up a virtual environment and activate it: (change according to your directory structure)
 
 For macOS/Linux:
-
+```shell
 ~/your-project $ python -m venv ./venv/
 ~/your-project $ source venv/bin/activate
 (venv) ~/your-project $ 
-
+```
 
 To deactivate the virtual environment, use the command:
-
+```shell
 (venv) $ deactivate
 ```
 
 ## **2.2 Install Packages**
 
 Install the required dependencies:
-
+```shell
 (venv) ~/your-project $ pip install -r requirements.txt
-
+```shell
 ## **2.3 Run N-gram**
 
 (1) Run N-gram Demo
 
-The code takes a corpus of Java methods as input and automatically identifies the best-performing model based on a specific N-value. It then evaluates the selected model on the test set extracted according to the assignment specifications.
-
-
+The script takes a corpus of Java methods as input and automatically identifies the best-performing model based on a specific N-value. It then evaluates the selected model on the test set extracted according to the assignment specifications.
+Since the training corpus differs from both the instructor-provided dataset and our own dataset, we store the results in a file named results_provided_model.[json/csv/txt] to distinguish them accordingly.
+```shell
+(venv) ~/your-project $ python ngram.py corpus.txt
+```
 ## 3. Report
 
 The assignment report is available in the file Assignment_Report.pdf.
