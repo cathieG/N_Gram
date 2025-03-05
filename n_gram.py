@@ -14,7 +14,6 @@ from nltk.lm.preprocessing import padded_everygram_pipeline
 from nltk import ngrams
 from nltk import FreqDist
 from nltk.lm import Laplace
-from nltk.lm.models import NgramModel
 import numpy as np
 import matplotlib.pyplot as plt
 import collections
@@ -25,6 +24,8 @@ import heapq
 import math
 import json
 import csv
+
+
 
 def txt_to_df(file_path):
     with open(file_path,'r') as file:
@@ -97,16 +98,20 @@ def build_ngram_tokens_list(tokens_list, n):
 
 
 def eval_ngram_model_nltk(eval_data, n, lm):
-  print(n)
+#   print(n)
   test_eval_data = build_ngram_tokens_list(eval_data, n)
 
   return lm.perplexity(test_eval_data)
 
 
-def generate_next_token(context):
+def generate_next_token(context, lm):
   next_token = lm.generate(1, context)
   prob = lm.score(next_token, context)
-  return next_token, prob
+#   print()
+#   print("length of context is: "+str(len(context)))
+#   print("This is next token from the method: " +str(next_token))
+#   print("This is token[0]: " +str(next_token[0]))
+  return str(next_token), prob
 
 
 def check_balance(tokens):
@@ -126,19 +131,34 @@ def check_balance(tokens):
   return len(stack) == 0
 
 
-def chain_generate_tokens(starting_context, context_size, max_length):
-    generated_tokens = starting_context
+def chain_generate_tokens(starting_context, context_size, max_length, lm):
+    # print("start cont: " +str(starting_context))
+    # print(type(starting_context))
+    generated_tokens = []
+    for item in starting_context:
+        generated_tokens.append(item)
     output_pair = []
+    # print(generated_tokens)
+    # print(type(generated_tokens))
 
 
     for i in range(max_length):
       context = generated_tokens[-(context_size):]
-      next_token, prob = generate_next_token(context)
+      if not (isinstance(context, list)):
+         context = list(context)
+    #   print("This is the context: " +str(context))
+      next_token, prob = generate_next_token(context, lm)
 
       if next_token == None:
         break
 
-      generated_tokens.append(next_token)
+    #   print("Next token is: " +str(next_token))  
+    #   print(generated_tokens)
+    #   print("g tokens is " +str(generated_tokens))
+    #   print()
+    #   print("G token is type: " + str(type(generated_tokens)))
+    #   print()
+      generated_tokens.append(str(next_token))
       output_pair.append((next_token, prob))
 
       if check_balance(generated_tokens):
@@ -158,7 +178,7 @@ def test_ngram_model(n, testing_list, filename, lm):
 
     for i in range(len(testing_list)):
       starting_context = testing_list[i][:n-1]
-      output_list, perp = chain_generate_tokens(starting_context, n-1, 512)
+      output_list, perp = chain_generate_tokens(starting_context, n-1, 512, lm)
 
       total_perplexity += perp
       output_string = "[" + str(i+1) + "]: "  + str(output_list)
@@ -173,43 +193,47 @@ def test_ngram_model(n, testing_list, filename, lm):
 
   print("Model perplexity is: "+ str(total_perplexity/count))
 
-def process_ngram_model_teacher(teacher_token_list, token_list, filename):
+# def process_ngram_model_teacher(teacher_token_list, token_list, filename):
 
-  random.shuffle(token_list)
+#   random.shuffle(token_list)
 
-  evaluation_data = token_list[:8000]
-  testing_data = token_list[8000:16000]
-  #training_data = token_list[16000:80000]
+#   evaluation_data = token_list[:8]
+#   testing_data = token_list[8:16]
+# #   evaluation_data = token_list[:8000]
+# #   testing_data = token_list[8000:16000]
+#   #training_data = token_list[16000:80000]
 
-  print("Starting training process:")
-  print()
-  best_perplexity = []
-  for n in [3, 5, 7]:
-    train_data, vocab = padded_everygram_pipeline(n, teacher_token_list)
+#   print("Starting training process:")
+#   print()
+#   best_perplexity = []
+#   for n in [3, 5, 7]:
+#     train_data, vocab = padded_everygram_pipeline(n, teacher_token_list[:100])
 
-    lm = Laplace(n)
-    lm.fit(train_data, vocab)
+#     lm = Laplace(n)
+#     lm.fit(train_data, vocab)
 
-    perp = eval_ngram_model_nltk(evaluation_data, n, lm)
+#     perp = eval_ngram_model_nltk(evaluation_data, n)
 
-    print(n)
-    print(perp)
-    print()
+#     print(n)
+#     print(perp)
+#     print()
 
-    if len(best_perplexity) == 0:
-      best_perplexity.append((n,perp))
-      best_lm = lm
+#     if len(best_perplexity) == 0:
+#       best_perplexity.append((n,perp))
+#       best_lm = lm
 
-    elif len(best_perplexity) != 0:
-      if best_perplexity[0][1] > perp:
-        best_perplexity[0] = (n, perp)
-        best_lm = lm
+#     elif len(best_perplexity) != 0:
+#       if best_perplexity[0][1] > perp:
+#         best_perplexity[0] = (n, perp)
+        
 
-  best_n = best_perplexity[0][0]
-  print("Best n is: " + str(best_n))
-  print()
+#   best_n = best_perplexity[0][0]
+#   print("Best n is: " + str(best_n))
+#   print()
 
-  test_ngram_model(best_n, testing_data, filename, best_lm)
+#   test_ngram_model(best_n, testing_data, filename)
+
+  
 
 def main():
 
@@ -246,8 +270,44 @@ def main():
     #training, testing, and output
     filename = 'results_teacher_model.json'
 
-    process_ngram_model_teacher(token_list, our_data, filename)
+    random.shuffle(token_list)
 
+    evaluation_data = our_data[:8000]
+    testing_data = our_data[8000:16000]
+#   evaluation_data = token_list[:8000]
+#   testing_data = token_list[8000:16000]
+  #training_data = token_list[16000:80000]
+
+    print("Starting training process:")
+    print()
+    best_perplexity = []
+    for n in [3, 5, 7]:
+        train_data, vocab = padded_everygram_pipeline(n, token_list)
+
+        lm = Laplace(n)
+        lm.fit(train_data, vocab)
+
+        perp = eval_ngram_model_nltk(evaluation_data, n, lm)
+
+        print(n)
+        print(perp)
+        print()
+
+        if len(best_perplexity) == 0:
+            best_perplexity.append((n,perp))
+            best_lm = lm
+
+        elif len(best_perplexity) != 0:
+            if best_perplexity[0][1] > perp:
+                best_perplexity[0] = (n, perp)
+        
+
+    best_n = best_perplexity[0][0]
+    print("Best n is: " + str(best_n))
+    print()
+
+    
+    test_ngram_model(best_n, testing_data, filename, lm)
 
 if __name__ == '__main__':
     main()
