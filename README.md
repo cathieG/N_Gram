@@ -8,8 +8,6 @@
 * [3 Report](#3-report)  
 
 ---
-**IMPORTANT**: As of right now, our code is not a script and cannot be interacted on command line. Everything is in google Colab(.ipynb). This README will be updated after we modity our code to be a script.
-
 
 # **1. Introduction**  
 This project explores **code completion in Java**, leveraging **N-gram language modeling**. The N-gram model predicts the next token in a sequence by learning the probability distributions of token occurrences in training data. The model selects the most probable token based on learned patterns, making it a fundamental technique in natural language processing and software engineering automation.  
