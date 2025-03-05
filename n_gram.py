@@ -94,10 +94,8 @@ def main():
     print("After removing comments:", len(df))
    
     print("Preprocessing completed.")
-    print(df.head())
 
     token_list = tokenize_methods(df)
-    print(token_list[:5])
     print(f"Total tokenized methods: {len(token_list)}")
 
 
